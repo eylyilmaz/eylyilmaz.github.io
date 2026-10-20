@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Eylül Yılmaz | Backend Geliştirici Adayı</title>
+  <meta name="description" content="Eylül Yılmaz, Yazılım Öğrencisi ve Backend Geliştirici Adayı. Projeler, eğitim ve iletişim." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        fontFamily: { display: ['Anton', 'Impact', 'sans-serif'], sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+        colors: { night: '#06070e', card: '#0d0f1c', edge: '#1d2140', web: '#e11d2e', blue: '#2b50d9', navy: '#14224f', mist: '#9ea3c0' }
+      } }
+    };
+  </script>
+  <style>
+    html { color-scheme: dark; }
+    body { background: #06070e; }
+
+    /* Örümcek ağı çizgileri */
+    .web-line { stroke: currentColor; stroke-width: 1; fill: none; vector-effect: non-scaling-stroke; }
+
+    /* Başlıklar: kırmızı gölgeli çizgi roman havası */
+    .hero-name { text-shadow: 5px 5px 0 #e11d2e; }
+    .h2 { font-family: Anton, Impact, sans-serif; text-transform: uppercase; letter-spacing: .01em; }
+    .h2::after { content: ""; display: block; width: 56px; height: 4px; margin-top: 12px; background: #e11d2e; }
+
+    /* Kartlar */
+    .card { position: relative; overflow: hidden; background: #0d0f1c; border: 1px solid #1d2140; border-radius: 16px;
+            transition: transform .3s cubic-bezier(.2,.7,.2,1), border-color .3s, box-shadow .3s; }
+    .card .corner-web { position: absolute; right: -1px; top: -1px; width: 120px; height: 120px; color: #e11d2e; opacity: 0; transition: opacity .3s; pointer-events: none; }
+    .card:hover, .card:focus-within { transform: translateY(-4px); border-color: #e11d2e; box-shadow: 0 14px 40px -18px rgba(225,29,46,.6); }
+    .card:hover .corner-web, .card:focus-within .corner-web { opacity: .55; }
+    .tag { border: 1px solid #1d2140; transition: border-color .3s, background-color .3s, color .3s; }
+    .card:hover .tag { border-color: #2b50d9; background: rgba(43,80,217,.12); color: #fff; }
+
+    /* Butonlarda hover'da beliren ağ */
+    .web-btn { position: relative; overflow: hidden; isolation: isolate; }
+    .web-btn::before {
+      content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0; transition: opacity .3s, transform .4s;
+      transform: scale(1.15); transform-origin: 100% 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' preserveAspectRatio='xMaxYMin slice'%3E%3Cg fill='none' stroke='white' stroke-width='1.4' stroke-opacity='.55'%3E%3Cpath d='M200 0 L0 0 M200 0 L10 70 M200 0 L50 150 M200 0 L130 190 M200 0 L200 200'/%3E%3Cpath d='M155 0 Q158 30 200 45 M110 0 Q120 62 200 90 M65 0 Q82 92 200 135 M20 0 Q50 120 200 180'/%3E%3C/g%3E%3C/svg%3E") right top / auto 260% no-repeat;
+    }
+    .web-btn:hover::before, .web-btn:focus-visible::before { opacity: 1; transform: scale(1); }
+
+    /* Fareyi takip eden ağ */
+    #webcanvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+    /* Hero madalyonu */
+    .medal-web { transition: transform 1.2s cubic-bezier(.2,.7,.2,1); }
+    .medal:hover .medal-web { transform: rotate(15deg); }
+    @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    .float-tag { animation: bob 6s ease-in-out infinite; }
+    .tech-tag { transition: border-color .3s, color .3s, box-shadow .3s; }
+    .tech-tag:hover { border-color: #e11d2e; box-shadow: 0 0 24px -6px rgba(225,29,46,.7); }
+    @media (prefers-reduced-motion: reduce) { .float-tag { animation: none; } .medal-web { transition: none; } }
+
+    /* Örümcek ipi: kaydırdıkça iner */
+    #thread { position: fixed; top: 0; right: 14px; z-index: 30; width: 0; pointer-events: none; }
+    #thread i { display: block; width: 1px; height: 60px; background: rgba(255,255,255,.55); margin: 0 auto; }
+    #thread svg { display: block; margin: -2px 0 0 -11px; }
+
+    /* Açılış */
+    @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+    .intro > * { opacity: 0; animation: rise .7s cubic-bezier(.2,.7,.2,1) forwards; }
+    .intro > *:nth-child(2) { animation-delay: .1s; } .intro > *:nth-child(3) { animation-delay: .2s; }
+    .intro > *:nth-child(4) { animation-delay: .3s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .intro > * { animation: none; opacity: 1; }
+      .card, .card .corner-web { transition: none; }
+      .card:hover, .card:focus-within { transform: none; }
+      html { scroll-behavior: auto; }
+    }
+    a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 10px; }
+    @media (max-width: 640px) { .hero-name { text-shadow: 3px 3px 0 #e11d2e; } }
+  </style>
+</head>
+<body class="font-sans text-white antialiased selection:bg-web selection:text-white">
+
+  <!-- Ağ deseni (tekrar kullanılır) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="web" viewBox="0 0 200 200">
+      <g class="web-line">
+        <path d="M0 0 L200 0 M0 0 L190 70 M0 0 L150 150 M0 0 L70 190 M0 0 L0 200"/>
+        <path d="M45 0 Q42 30 0 45 M90 0 Q80 62 0 90 M135 0 Q118 92 0 135 M180 0 Q150 120 0 180"/>
+      </g>
+    </symbol>
+  </svg>
+
+  <!-- Kaydırdıkça inen örümcek -->
+  <div id="thread" aria-hidden="true">
+    <i></i>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="#e11d2e" stroke="#e11d2e" stroke-width="1.4" stroke-linecap="round">
+      <ellipse cx="12" cy="14" rx="4" ry="5" stroke="none"/><circle cx="12" cy="8" r="2.6" stroke="none"/>
+      <path fill="none" d="M8 12 3 8M8 14 2 14M8.5 16.5 4 21M16 12l5-4M16 14l6 0M15.5 16.5 20 21"/>
+    </svg>
+  </div>
+
+  <!-- Arka plan ışıkları ve köşe ağları -->
+  <div class="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
+    <div class="absolute -right-40 -top-40 h-[28rem] w-[28rem] rounded-full bg-web/20 blur-[120px]"></div>
+    <div class="absolute -bottom-48 -left-40 h-[30rem] w-[30rem] rounded-full bg-blue/20 blur-[130px]"></div>
+    <svg class="absolute left-0 top-0 h-56 w-56 text-white/15 sm:h-80 sm:w-80"><use href="#web"/></svg>
+    <svg class="absolute bottom-0 right-0 h-56 w-56 rotate-180 text-white/10 sm:h-80 sm:w-80"><use href="#web"/></svg>
+  </div>
+  <canvas id="webcanvas" aria-hidden="true"></canvas>
+
+  <div class="relative z-10 mx-auto max-w-5xl px-6 sm:px-8">
+
+    <header class="flex items-center justify-between py-7">
+      <a href="#top" class="hidden font-display text-2xl tracking-wide sm:inline">E<span class="text-web">.</span>Y<span class="text-web">.</span></a>
+      <nav class="flex w-full justify-between gap-3 text-[13px] font-medium text-mist sm:w-auto sm:justify-end sm:gap-7 sm:text-sm" aria-label="Ana menü">
+        <a href="#hakkimda" class="transition-colors hover:text-white">Hakkımda</a>
+        <a href="#egitim" class="transition-colors hover:text-white">Eğitim</a>
+        <a href="#yetenekler" class="transition-colors hover:text-white">Yetenekler</a>
+        <a href="#projeler" class="transition-colors hover:text-white">Projeler</a>
+        <a href="#iletisim" class="transition-colors hover:text-white">İletişim</a>
+      </nav>
+    </header>
+
+    <main id="top">
+
+      <!-- Hero -->
+      <section class="grid min-h-[78vh] items-center gap-10 py-14 lg:grid-cols-[1.2fr_1fr]">
+        <div class="intro flex flex-col">
+        <p class="w-fit rounded-full border border-edge bg-card px-4 py-1.5 text-sm text-mist">
+          <span class="mr-2 inline-block h-2 w-2 rounded-full bg-web"></span>Staj ve yeni projelere açığım
+        </p>
+        <h1 class="hero-name mt-8 font-display text-[3.6rem] uppercase leading-[.95] sm:text-8xl lg:text-[7.5rem] xl:text-[8.5rem]">
+          Eylül<br />Yılmaz<span class="text-web">.</span>
+        </h1>
+        <p class="mt-7 max-w-xl text-lg font-medium text-white/90 sm:text-xl">Yazılım Öğrencisi &amp; Backend Geliştirici Adayı</p>
+        <div class="mt-9 flex flex-wrap gap-3">
+          <a href="#projeler" class="web-btn rounded-xl bg-web px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-red-500">Projelerimi gör</a>
+          <a href="https://github.com/eylyilmaz" target="_blank" rel="noopener noreferrer" class="web-btn rounded-xl border border-blue/60 bg-navy px-6 py-3.5 text-sm font-semibold text-white transition hover:border-white">GitHub profilim</a>
+        </div>
+        </div>
+
+      <!-- Sağ taraf: ağ madalyonu -->
+      <div class="relative mx-auto hidden w-full max-w-[26rem] lg:block" aria-hidden="true">
+        <div class="medal relative aspect-square">
+          <svg viewBox="0 0 400 400" class="medal-web absolute inset-0 h-full w-full text-white/25">
+            <g class="web-line"><path d="M200 200 L390.0 200.0 M200 200 L364.5 295.0 M200 200 L295.0 364.5 M200 200 L200.0 390.0 M200 200 L105.0 364.5 M200 200 L35.5 295.0 M200 200 L10.0 200.0 M200 200 L35.5 105.0 M200 200 L105.0 35.5 M200 200 L200.0 10.0 M200 200 L295.0 35.5 M200 200 L364.5 105.0 "/><path d="M245.0 200.0 Q239.1 210.5 239.0 222.5 Q228.6 228.6 222.5 239.0 Q210.5 239.1 200.0 245.0 Q189.5 239.1 177.5 239.0 Q171.4 228.6 161.0 222.5 Q160.9 210.5 155.0 200.0 Q160.9 189.5 161.0 177.5 Q171.4 171.4 177.5 161.0 Q189.5 160.9 200.0 155.0 Q210.5 160.9 222.5 161.0 Q228.6 171.4 239.0 177.5 Q239.1 189.5 245.0 200.0 Z M280.0 200.0 Q269.5 218.6 269.3 240.0 Q250.9 250.9 240.0 269.3 Q218.6 269.5 200.0 280.0 Q181.4 269.5 160.0 269.3 Q149.1 250.9 130.7 240.0 Q130.5 218.6 120.0 200.0 Q130.5 181.4 130.7 160.0 Q149.1 149.1 160.0 130.7 Q181.4 130.5 200.0 120.0 Q218.6 130.5 240.0 130.7 Q250.9 149.1 269.3 160.0 Q269.5 181.4 280.0 200.0 Z M315.0 200.0 Q300.0 226.8 299.6 257.5 Q273.2 273.2 257.5 299.6 Q226.8 300.0 200.0 315.0 Q173.2 300.0 142.5 299.6 Q126.8 273.2 100.4 257.5 Q100.0 226.8 85.0 200.0 Q100.0 173.2 100.4 142.5 Q126.8 126.8 142.5 100.4 Q173.2 100.0 200.0 85.0 Q226.8 100.0 257.5 100.4 Q273.2 126.8 299.6 142.5 Q300.0 173.2 315.0 200.0 Z M350.0 200.0 Q330.4 234.9 329.9 275.0 Q295.5 295.5 275.0 329.9 Q234.9 330.4 200.0 350.0 Q165.1 330.4 125.0 329.9 Q104.5 295.5 70.1 275.0 Q69.6 234.9 50.0 200.0 Q69.6 165.1 70.1 125.0 Q104.5 104.5 125.0 70.1 Q165.1 69.6 200.0 50.0 Q234.9 69.6 275.0 70.1 Q295.5 104.5 329.9 125.0 Q330.4 165.1 350.0 200.0 Z M385.0 200.0 Q360.8 243.1 360.2 292.5 Q317.7 317.7 292.5 360.2 Q243.1 360.8 200.0 385.0 Q156.9 360.8 107.5 360.2 Q82.3 317.7 39.8 292.5 Q39.2 243.1 15.0 200.0 Q39.2 156.9 39.8 107.5 Q82.3 82.3 107.5 39.8 Q156.9 39.2 200.0 15.0 Q243.1 39.2 292.5 39.8 Q317.7 82.3 360.2 107.5 Q360.8 156.9 385.0 200.0 Z "/></g>
+            <circle cx="200" cy="200" r="190" fill="none" stroke="#e11d2e" stroke-opacity=".5" stroke-width="1.5"/>
+          </svg>
+          <div class="absolute left-1/2 top-1/2 flex h-36 w-36 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-web bg-card shadow-[0_0_60px_-10px_rgba(225,29,46,.7)]">
+            <span class="hero-name font-display text-5xl leading-none" style="text-shadow:3px 3px 0 #e11d2e">E.Y.</span>
+          </div>
+          <div class="absolute -translate-x-1/2 -translate-y-1/2" style="left:50.0%;top:2.5%">
+            <span class="float-tag tech-tag flex items-center gap-2 whitespace-nowrap rounded-lg border border-edge bg-card px-3.5 py-2 text-sm font-medium" style="animation-delay:-0.0s"><i class="h-1.5 w-1.5 rounded-full bg-white/70"></i>C#</span>
+          </div>
+          <div class="absolute -translate-x-1/2 -translate-y-1/2" style="left:83.6%;top:16.4%">
+            <span class="float-tag tech-tag flex items-center gap-2 whitespace-nowrap rounded-lg border border-edge bg-card px-3.5 py-2 text-sm font-medium" style="animation-delay:-1.5s"><i class="h-1.5 w-1.5 rounded-full bg-white/70"></i>ASP.NET Core</span>
+          </div>
+          <div class="absolute -translate-x-1/2 -translate-y-1/2" style="left:97.5%;top:50.0%">
+            <span class="float-tag tech-tag flex items-center gap-2 whitespace-nowrap rounded-lg border border-edge bg-card px-3.5 py-2 text-sm font-medium" style="animation-delay:-3.0s"><i class="h-1.5 w-1.5 rounded-full bg-white/70"></i>MySQL</span>
+          </div>
+          <div class="absolute -translate-x-1/2 -translate-y-1/2" style="left:83.6%;top:83.6%">
+            <span class="float-tag tech-tag flex items-center gap-2 whitespace-nowrap rounded-lg border border-web/70 bg-card px-3.5 py-2 text-sm font-medium" style="animation-delay:-4.5s"><i class="h-1.5 w-1.5 rounded-full bg-web"></i>Git / GitHub</span>
+          </div>
+          <div class="absolute -translate-x-1/2 -translate-y-1/2" style="left:50.0%;top:97.5%">
+            <span class="float-tag tech-tag flex items-center gap-2 whitespace-nowrap rounded-lg border border-blue/60 bg-navy px-3.5 py-2 text-sm font-medium" style="animation-delay:-0.0s"><i class="h-1.5 w-1.5 rounded-full bg-blue"></i>Tailwind CSS</span>
+          </div>
+          <div class="absolute -translate-x-1/2 -translate-y-1/2" style="left:16.4%;top:83.6%">
+            <span class="float-tag tech-tag flex items-center gap-2 whitespace-nowrap rounded-lg border border-blue/60 bg-navy px-3.5 py-2 text-sm font-medium" style="animation-delay:-1.5s"><i class="h-1.5 w-1.5 rounded-full bg-blue"></i>JavaScript</span>
+          </div>
+          <div class="absolute -translate-x-1/2 -translate-y-1/2" style="left:2.5%;top:50.0%">
+            <span class="float-tag tech-tag flex items-center gap-2 whitespace-nowrap rounded-lg border border-blue/60 bg-navy px-3.5 py-2 text-sm font-medium" style="animation-delay:-3.0s"><i class="h-1.5 w-1.5 rounded-full bg-blue"></i>CSS3</span>
+          </div>
+          <div class="absolute -translate-x-1/2 -translate-y-1/2" style="left:16.4%;top:16.4%">
+            <span class="float-tag tech-tag flex items-center gap-2 whitespace-nowrap rounded-lg border border-blue/60 bg-navy px-3.5 py-2 text-sm font-medium" style="animation-delay:-4.5s"><i class="h-1.5 w-1.5 rounded-full bg-blue"></i>HTML5</span>
+          </div>
+        </div>
+      </div>
+      </section>
+
+      <!-- Hakkımda -->
+      <section id="hakkimda" class="scroll-mt-6 py-20">
+        <h2 class="h2 text-4xl sm:text-5xl">Hakkımda</h2>
+        <p class="mt-8 max-w-2xl text-lg leading-relaxed text-mist">
+          Yazılıma ve özellikle <span class="text-white">backend teknolojilerine</span> tutkuyla bağlı bir geliştirici adayıyım. Yeni teknolojiler öğrenmeyi, kod yazmayı ve öğrendiklerimi gerçek projelere dönüştürmeyi seviyorum.
+        </p>
+      </section>
+
+      <!-- Eğitim -->
+      <section id="egitim" class="scroll-mt-6 py-20">
+        <h2 class="h2 text-4xl sm:text-5xl">Eğitim &amp; Başarılar</h2>
+        <div class="mt-9 grid gap-4 md:grid-cols-5">
+          <article class="card p-6 sm:p-7 md:col-span-3">
+            <svg class="corner-web" aria-hidden="true"><use href="#web"/></svg>
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl border border-edge text-web">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 9 10-5 10 5-10 5L2 9Z"/><path d="M6 11.5V16c0 1.4 2.7 3 6 3s6-1.6 6-3v-4.5"/></svg>
+            </div>
+            <h3 class="mt-6 text-xl font-semibold">Anadolu Üniversitesi</h3>
+            <p class="mt-1 text-mist">Bilişim Teknolojileri Meslek Yüksekokulu</p>
+            <p class="mt-4 leading-relaxed text-mist">Arka-Yüz Yazılım Geliştirme Bölümü, 2. sınıf. Web teknolojileri ve backend geliştirme üzerine çalışıyorum.</p>
+          </article>
+          <article class="card p-6 sm:p-7 md:col-span-2">
+            <svg class="corner-web" aria-hidden="true"><use href="#web"/></svg>
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl border border-web/50 text-web">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="m8.5 14.5-1.5 7 5-3 5 3-1.5-7"/></svg>
+            </div>
+            <h3 class="mt-6 text-xl font-semibold">Yüksek Onur Belgesi</h3>
+            <p class="mt-3 leading-relaxed text-mist">Dönem başarılarım nedeniyle Yüksek Onur Belgesi almaya hak kazandım.</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- Yetenekler -->
+      <section id="yetenekler" class="scroll-mt-6 py-20">
+        <h2 class="h2 text-4xl sm:text-5xl">Teknik Yetenekler</h2>
+        <ul class="mt-9 grid gap-3 sm:grid-cols-2" id="skills"></ul>
+      </section>
+
+      <!-- Projeler -->
+      <section id="projeler" class="scroll-mt-6 py-20">
+        <h2 class="h2 text-4xl sm:text-5xl">Projelerim</h2>
+        <div class="mt-9 grid gap-4 md:grid-cols-2">
+
+          <article class="card flex flex-col p-6 sm:p-7">
+            <svg class="corner-web" aria-hidden="true"><use href="#web"/></svg>
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl border border-edge text-web">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.2 7.8 8 9 4.8-1.2 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <h3 class="mt-6 text-xl font-semibold leading-snug">Sigorta Takip Sistemi <span class="font-normal text-mist">(Staj Projesi)</span></h3>
+            <p class="mt-3 leading-relaxed text-mist">C#, ASP.NET Core MVC, Entity Framework Core ve MySQL kullanarak geliştirdiğim kapsamlı web tabanlı sigorta yönetim sistemi. Poliçe, müşteri ve süreç takibi üzerine kuruldu.</p>
+            <ul class="mt-6 flex flex-wrap gap-2" aria-label="Kullanılan teknolojiler">
+              <li class="tag rounded-lg px-3 py-1.5 text-sm text-mist">C#</li>
+              <li class="tag rounded-lg px-3 py-1.5 text-sm text-mist">ASP.NET Core MVC</li>
+              <li class="tag rounded-lg px-3 py-1.5 text-sm text-mist">Entity Framework Core</li>
+              <li class="tag rounded-lg px-3 py-1.5 text-sm text-mist">MySQL</li>
+            </ul>
+          </article>
+
+          <article class="card flex flex-col p-6 sm:p-7">
+            <svg class="corner-web" aria-hidden="true"><use href="#web"/></svg>
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl border border-edge text-web">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M8 21h8M12 18v3"/></svg>
+            </div>
+            <h3 class="mt-6 text-xl font-semibold leading-snug">Sigorta Şirketi Sitesi</h3>
+            <p class="mt-3 leading-relaxed text-mist">Sigortacılık hizmetlerini modern ve anlaşılır bir kullanıcı arayüzüyle sunmak için geliştirdiğim web projesi.</p>
+            <ul class="mt-6 flex flex-wrap gap-2" aria-label="Kullanılan teknolojiler">
+              <li class="tag rounded-lg px-3 py-1.5 text-sm text-mist">HTML</li>
+              <li class="tag rounded-lg px-3 py-1.5 text-sm text-mist">CSS</li>
+              <li class="tag rounded-lg px-3 py-1.5 text-sm text-mist">JavaScript</li>
+            </ul>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- İletişim -->
+      <section id="iletisim" class="scroll-mt-6 py-20 text-center">
+        <h2 class="h2 mx-auto inline-block text-left text-4xl sm:text-5xl">İletişim</h2>
+        <p class="mx-auto mt-8 max-w-md text-mist">Bir fırsat, proje ya da sadece merhaba demek için bana yazabilirsin.</p>
+        <div class="mx-auto mt-8 flex max-w-lg flex-col gap-3 sm:flex-row">
+          <a href="mailto:eyluuly@hotmail.com" class="web-btn flex flex-1 items-center justify-center gap-3 rounded-xl bg-web px-6 py-4 font-semibold transition hover:bg-red-500">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+            E-posta gönder
+          </a>
+          <a href="https://github.com/eylyilmaz" target="_blank" rel="noopener noreferrer" class="web-btn flex flex-1 items-center justify-center gap-3 rounded-xl border border-blue/60 bg-navy px-6 py-4 font-semibold transition hover:border-white">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.64 1.59.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
+            GitHub
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-edge py-8 text-sm text-mist">© <span id="year">2026</span> Eylül Yılmaz</footer>
+  </div>
+
+  <script>
+    // Yetenek listesi
+    const skills = [
+      ['C#', 'Backend'], ['ASP.NET Core', 'Backend'], ['MySQL', 'Veritabanı'], ['HTML5', 'Arayüz'],
+      ['CSS3', 'Arayüz'], ['JavaScript', 'Arayüz'], ['Tailwind CSS', 'Arayüz']
+    ];
+    document.getElementById('skills').innerHTML = skills.map(([n, c]) => `
+      <li class="card flex items-center justify-between px-5 py-4">
+        <svg class="corner-web" style="width:90px;height:90px" aria-hidden="true"><use href="#web"/></svg>
+        <span class="flex items-center gap-3 font-medium"><span class="h-2 w-2 rounded-full bg-web"></span>${n}</span>
+        <span class="text-xs text-mist">${c}</span>
+      </li>`).join('');
+
+    // Örümcek ipi kaydırma ilerlemesine göre uzar
+    const thread = document.querySelector('#thread i');
+    const update = () => {
+      const max = document.documentElement.scrollHeight - innerHeight;
+      const p = max > 0 ? scrollY / max : 0;
+      thread.style.height = (60 + p * innerHeight * 0.6) + 'px';
+    };
+    addEventListener('scroll', update, { passive: true });
+    addEventListener('resize', update);
+    update();
+
+    // Fareyi (veya parmağı) takip eden örümcek ağı
+    (() => {
+      const cv = document.getElementById('webcanvas');
+      const ctx = cv.getContext('2d');
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) { cv.remove(); return; }
+      const GAP = 84, R = 190;
+      let w, h, nodes = [], cols, dpr;
+      const m = { x: -999, y: -999, tx: -999, ty: -999, power: 0 };
+
+      function build() {
+        dpr = Math.min(devicePixelRatio || 1, 2);
+        w = innerWidth; h = innerHeight;
+        cv.width = w * dpr; cv.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        cols = Math.ceil(w / GAP) + 1;
+        const rows = Math.ceil(h / GAP) + 1;
+        nodes = [];
+        for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++)
+          nodes.push({ x: c * GAP + (Math.random() - .5) * GAP * .55, y: r * GAP + (Math.random() - .5) * GAP * .55 });
+      }
+      build(); addEventListener('resize', build);
+
+      addEventListener('pointermove', e => {
+        m.tx = e.clientX; m.ty = e.clientY; m.power = 1;
+        if (m.x < 0) { m.x = m.tx; m.y = m.ty; }
+      }, { passive: true });
+
+      const near = (n) => Math.hypot(n.x - m.x, n.y - m.y);
+      function frame() {
+        m.x += (m.tx - m.x) * .18; m.y += (m.ty - m.y) * .18;
+        m.power *= .985;
+        ctx.clearRect(0, 0, w, h);
+        if (m.power > .02) {
+          const act = [];
+          nodes.forEach((n, i) => { const d = near(n); if (d < R) act.push([i, d]); });
+          ctx.lineWidth = 1;
+          // ağın iç halkaları
+          act.forEach(([i]) => {
+            [i + 1, i + cols, i + cols + 1].forEach(j => {
+              const a = nodes[i], b = nodes[j];
+              if (!b || (j === i + 1 && (i + 1) % cols === 0)) return;
+              const f = (1 - Math.max(near(a), near(b)) / R);
+              if (f <= 0) return;
+              ctx.strokeStyle = `rgba(255,255,255,${f * .28 * m.power})`;
+              ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+            });
+          });
+          // imleçten düğümlere ışınlar
+          act.forEach(([i, d]) => {
+            const n = nodes[i], f = 1 - d / R;
+            ctx.strokeStyle = `rgba(225,29,46,${f * .75 * m.power})`;
+            ctx.beginPath(); ctx.moveTo(m.x, m.y); ctx.lineTo(n.x, n.y); ctx.stroke();
+            ctx.fillStyle = `rgba(255,255,255,${f * .8 * m.power})`;
+            ctx.beginPath(); ctx.arc(n.x, n.y, 1.6, 0, 6.283); ctx.fill();
+          });
+        }
+        requestAnimationFrame(frame);
+      }
+      frame();
+    })();
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
